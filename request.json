@@ -1,0 +1,10 @@
+{
+    "calls": [
+        {
+            "url": "https://www.google.com",
+            "method": "GET",
+            "headers": {},
+            "bodyString": ""
+        }
+    ]
+}
