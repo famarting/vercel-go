@@ -9,6 +9,10 @@ import (
 	"strings"
 )
 
+type CloudEventRequest struct {
+	Data OpRequest `json:"data"`
+}
+
 type OpRequest struct {
 	Calls []CallSpec `json:"calls"`
 }
@@ -50,11 +54,16 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	var req OpRequest
 
-	err = json.Unmarshal(body, &req)
+	err = JSONStrictUnmarshal(body, &req)
 	if err != nil {
-		w.Header().Add("err-msg", err.Error())
-		w.WriteHeader(500)
-		return
+		var ceReq CloudEventRequest
+		ceerr := json.Unmarshal(body, &ceReq)
+		if ceerr != nil {
+			w.Header().Add("err-msg", err.Error())
+			w.WriteHeader(500)
+			return
+		}
+		req = ceReq.Data
 	}
 
 	res := []CallResult{}
@@ -124,4 +133,11 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("content-type", "application/json")
 	w.WriteHeader(200)
 	_, _ = w.Write(objRes)
+}
+
+func JSONStrictUnmarshal(b []byte, t interface{}) error {
+	reader := bytes.NewReader(b)
+	decoder := json.NewDecoder(reader)
+	decoder.DisallowUnknownFields()
+	return decoder.Decode(t)
 }
