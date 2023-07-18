@@ -3,6 +3,7 @@ package api
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"strings"
@@ -40,10 +41,12 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
+		fmt.Println("error reading request body " + err.Error())
 		w.Header().Add("msg", "hello")
 		w.WriteHeader(200)
 		return
 	}
+	fmt.Println("received request " + string(body))
 
 	var req OpRequest
 
