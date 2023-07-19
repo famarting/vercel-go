@@ -38,16 +38,13 @@ type CallResult struct {
 func Handler(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method != "POST" {
-		w.Header().Add("msg", "hello")
-		w.WriteHeader(200)
+		respondResult(w, "ok")
 		return
 	}
 
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
-		fmt.Println("error reading request body " + err.Error())
-		w.Header().Add("msg", "hello")
-		w.WriteHeader(200)
+		respondResult(w, err.Error())
 		return
 	}
 	fmt.Println("received request " + string(body))
@@ -59,8 +56,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		var ceReq CloudEventRequest
 		ceerr := json.Unmarshal(body, &ceReq)
 		if ceerr != nil {
-			w.Header().Add("err-msg", err.Error())
-			w.WriteHeader(500)
+			respondResult(w, err.Error())
 			return
 		}
 		req = ceReq.Data
@@ -125,8 +121,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		Calls: res,
 	})
 	if err != nil {
-		w.Header().Add("err-msg", err.Error())
-		w.WriteHeader(500)
+		respondResult(w, err.Error())
 		return
 	}
 
@@ -140,4 +135,23 @@ func JSONStrictUnmarshal(b []byte, t interface{}) error {
 	decoder := json.NewDecoder(reader)
 	decoder.DisallowUnknownFields()
 	return decoder.Decode(t)
+}
+
+func respondResult(w http.ResponseWriter, result string) {
+	objRes, err := json.Marshal(map[string]string{
+		"result": result,
+	})
+	if err != nil {
+		w.Header().Add("err-msg", err.Error())
+		w.WriteHeader(500)
+		return
+	}
+	w.Header().Add("content-type", "application/json")
+	w.Header().Add("msg", "hello")
+	if result == "" || result == "ok" {
+		w.WriteHeader(200)
+	} else {
+		w.WriteHeader(500)
+	}
+	_, _ = w.Write(objRes)
 }
