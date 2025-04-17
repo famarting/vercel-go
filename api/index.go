@@ -35,8 +35,18 @@ type CallResult struct {
 	Response []byte            `json:"response"`
 }
 
-func Handler(w http.ResponseWriter, r *http.Request) {
+var mux = http.NewServeMux()
 
+func init() {
+	mux.HandleFunc("/workflow", workflowHandler)
+	mux.HandleFunc("/call", callHandler)
+}
+
+func Handler(w http.ResponseWriter, r *http.Request) {
+	mux.ServeHTTP(w, r)
+}
+
+func callHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
 		respondResult(w, "ok")
 		return
@@ -139,20 +149,27 @@ func JSONStrictUnmarshal(b []byte, t interface{}) error {
 }
 
 func respondResult(w http.ResponseWriter, result string) {
-	objRes, err := json.Marshal(map[string]string{
+	respondJson(w, map[string]string{
 		"result": result,
 	})
+}
+
+func respondJson(w http.ResponseWriter, result any) {
+	objRes, err := json.Marshal(result)
 	if err != nil {
-		w.Header().Add("err-msg", err.Error())
-		w.WriteHeader(500)
+		respondError(w, err)
 		return
 	}
 	w.Header().Add("content-type", "application/json")
-	w.Header().Add("msg", "hello")
 	if result == "" || result == "ok" {
 		w.WriteHeader(200)
 	} else {
 		w.WriteHeader(500)
 	}
 	_, _ = w.Write(objRes)
+}
+
+func respondError(w http.ResponseWriter, err error) {
+	w.Header().Add("err-msg", err.Error())
+	w.WriteHeader(500)
 }
