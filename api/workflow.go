@@ -10,7 +10,7 @@ import (
 	"github.com/dapr/go-sdk/workflow"
 )
 
-func workflowHandler(w http.ResponseWriter, r *http.Request) {
+func WorkflowHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
 		respondResult(w, "ok")
 		return

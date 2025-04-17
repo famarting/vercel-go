@@ -35,18 +35,7 @@ type CallResult struct {
 	Response []byte            `json:"response"`
 }
 
-var mux = http.NewServeMux()
-
-func init() {
-	mux.HandleFunc("/workflow", workflowHandler)
-	mux.HandleFunc("/call", callHandler)
-}
-
-func Handler(w http.ResponseWriter, r *http.Request) {
-	mux.ServeHTTP(w, r)
-}
-
-func callHandler(w http.ResponseWriter, r *http.Request) {
+func CallHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
 		respondResult(w, "ok")
 		return
