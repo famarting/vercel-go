@@ -88,7 +88,7 @@ func WorkflowHandler(w http.ResponseWriter, r *http.Request) {
 
 func TestWorkflow(ctx *workflow.WorkflowContext) (any, error) {
 	var result string
-	err := ctx.CallActivity(TestActivity).Await(result)
+	err := ctx.CallActivity(TestActivity).Await(&result)
 	if err != nil {
 		return nil, err
 	}
