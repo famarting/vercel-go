@@ -1,4 +1,4 @@
-package api
+package handler
 
 import (
 	"bytes"
@@ -56,7 +56,8 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		var ceReq CloudEventRequest
 		ceerr := json.Unmarshal(body, &ceReq)
 		if ceerr != nil {
-			respondResult(w, err.Error())
+			fmt.Println("received non json body " + ceerr.Error())
+			respondResult(w, "ok")
 			return
 		}
 		req = ceReq.Data
